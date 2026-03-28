@@ -1,0 +1,22 @@
+#!/bin/sh
+# pre-commit hook to run linting
+echo "Running pre-commit checks..."
+
+# Check frontend lint
+if [ -d "frontend" ]; then
+  echo "Checking frontend linting..."
+  cd frontend || exit 1
+  if command -v npm >/dev/null 2>&1; then
+    npm run lint
+    if [ $? -ne 0 ]; then
+      echo "Frontend linting failed. Please fix before committing."
+      exit 1
+    fi
+  else
+    echo "npm not found. Skipping lint."
+  fi
+  cd ..
+fi
+
+echo "All pre-commit checks passed!"
+exit 0

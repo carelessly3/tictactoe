@@ -1,0 +1,15 @@
+# <type>(<scope>): <subject>
+#
+# Examples: 
+#   feat(frontend): add tic-tac-toe board
+#   fix(backend): resolve matchmaking loop issue
+#   docs(readme): update setup instructions
+#
+# Types: 
+#   feat: A new feature
+#   fix: A bug fix
+#   docs: Documentation only changes
+#   style: Changes that do not affect the meaning of the code
+#   refact: A code change that neither fixes a bug nor adds a feature
+#   test: Adding missing or correcting existing tests
+#   chore: Changes to the build process or auxiliary tools

@@ -1,0 +1,31 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Vite Frontend 
+frontend/dist/
+frontend/dist-ssr/
+frontend/*.local
+
+# Nakama Backend
+backend/build/
+backend/node_modules/
+backend/data/
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Project Information
+project-info/
+
+# Editor/OS Files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.log
