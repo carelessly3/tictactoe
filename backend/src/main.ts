@@ -1,7 +1,7 @@
 /// <reference types="nakama-runtime" />
-import { matchHandler } from './match_handler';
+import { matchInit, matchJoinAttempt, matchJoin, matchLeave, matchLoop, matchSignal, matchTerminate } from './match_handler';
 
-let InitModule: nkruntime.InitModule = function (
+function InitModule(
     ctx: nkruntime.Context,
     logger: nkruntime.Logger,
     nk: nkruntime.Nakama,
@@ -11,23 +11,25 @@ let InitModule: nkruntime.InitModule = function (
 
     // Register our authoritative match handler
     initializer.registerMatch("tic-tac-toe", {
-        matchInit: matchHandler.matchInit,
-        matchJoinAttempt: matchHandler.matchJoinAttempt,
-        matchJoin: matchHandler.matchJoin,
-        matchLeave: matchHandler.matchLeave,
-        matchLoop: matchHandler.matchLoop,
-        matchTerminate: matchHandler.matchTerminate,
-        matchSignal: matchHandler.matchSignal,
+        matchInit: matchInit,
+        matchJoinAttempt: matchJoinAttempt,
+        matchJoin: matchJoin,
+        matchLeave: matchLeave,
+        matchLoop: matchLoop,
+        matchTerminate: matchTerminate,
+        matchSignal: matchSignal,
     });
 
     // When the matchmaker has matched players, automatically spawn a match for them
-    initializer.registerMatchmakerMatched((context: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, matches: nkruntime.MatchmakerResult[]): string => {
-        logger.info("Matchmaker matched -> creating tic-tac-toe match");
-        const matchId = nk.matchCreate("tic-tac-toe", {});
-        return matchId;
-    });
+    initializer.registerMatchmakerMatched(matchmakerMatched);
 }
 
-// This is required for Nakama to "see" your init function
-// since you are bundling with Rollup.
-export { InitModule };
+function matchmakerMatched(context: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, matches: nkruntime.MatchmakerResult[]): string {
+    logger.info("Matchmaker matched -> creating tic-tac-toe match");
+    const matchId = nk.matchCreate("tic-tac-toe", {});
+    return matchId;
+}
+
+// Prevent rollup from tree-shaking without producing an unwanted `exports` variable
+// @ts-ignore
+globalThis.InitModule = InitModule;

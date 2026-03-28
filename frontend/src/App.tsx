@@ -51,6 +51,12 @@ function App() {
   const handleFindMatch = async () => {
     setAppState('matchmaking');
     try {
+      if (!nakama.socket) {
+        console.log("Socket not connected, attempting to connect...");
+        const session = await nakama.authenticate();
+        setUsername(session.username || 'Player');
+        await nakama.connectSocket();
+      }
       await nakama.findMatch(2, 2);
     } catch (e) {
        console.error("Matchmaking error", e);

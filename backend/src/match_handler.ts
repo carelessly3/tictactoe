@@ -1,7 +1,7 @@
 import { GameState, Mark, checkWin, Player } from './state';
 import { OpCode, MoveMessage } from './messages';
 
-const matchInit: nkruntime.MatchInitFunction = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, params: {[key: string]: string}) {
+function matchInit(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, params: {[key: string]: string}) {
     logger.debug('Tic-Tac-Toe match started');
     const state: GameState = {
         board: new Array(9).fill(Mark.EMPTY),
@@ -17,7 +17,7 @@ const matchInit: nkruntime.MatchInitFunction = function (ctx: nkruntime.Context,
     };
 };
 
-const matchJoinAttempt: nkruntime.MatchJoinAttemptFunction = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presence: nkruntime.Presence, metadata: {[key: string]: any}) {
+function matchJoinAttempt(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presence: nkruntime.Presence, metadata: {[key: string]: any}) {
     const gameState = state as GameState;
     if (gameState.players.length >= 2) {
         return { state, accept: false, rejectReason: "Match is full" };
@@ -25,7 +25,7 @@ const matchJoinAttempt: nkruntime.MatchJoinAttemptFunction = function (ctx: nkru
     return { state, accept: true };
 };
 
-const matchJoin: nkruntime.MatchJoinFunction = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presences: nkruntime.Presence[]) {
+function matchJoin(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presences: nkruntime.Presence[]) {
     const gameState = state as GameState;
     
     for (const presence of presences) {
@@ -47,7 +47,7 @@ const matchJoin: nkruntime.MatchJoinFunction = function (ctx: nkruntime.Context,
     return { state: gameState };
 };
 
-const matchLeave: nkruntime.MatchLeaveFunction = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presences: nkruntime.Presence[]) {
+function matchLeave(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, presences: nkruntime.Presence[]) {
     const gameState = state as GameState;
     
     // If the game is already over, we don't need to do anything.
@@ -73,7 +73,7 @@ const matchLeave: nkruntime.MatchLeaveFunction = function (ctx: nkruntime.Contex
     return { state: gameState };
 };
 
-const matchLoop: nkruntime.MatchLoopFunction = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, messages: nkruntime.MatchMessage[]) {
+function matchLoop(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, messages: nkruntime.MatchMessage[]) {
     const gameState = state as GameState;
     
     if (gameState.winner !== null) {
@@ -117,15 +117,15 @@ const matchLoop: nkruntime.MatchLoopFunction = function (ctx: nkruntime.Context,
     return { state: gameState };
 };
 
-const matchTerminate: nkruntime.MatchTerminateFunction = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, graceSeconds: number) {
+function matchTerminate(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, graceSeconds: number) {
     return null;
 };
 
-const matchSignal: nkruntime.MatchSignalFunction = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, data: string) {
+function matchSignal(ctx: nkruntime.Context, logger: nkruntime.Logger, nk: nkruntime.Nakama, dispatcher: nkruntime.MatchDispatcher, tick: number, state: nkruntime.MatchState, data: string) {
     return { state };
 };
 
-export const matchHandler = {
+export {
     matchInit,
     matchJoinAttempt,
     matchJoin,
