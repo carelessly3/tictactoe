@@ -1,111 +1,188 @@
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --bg-color: #111111;
+  --text-color: #33ff33; /* CRT Green */
+  --text-alt: #ffffff;
+  --x-color: #00ffff; /* Neon Cyan */
+  --o-color: #ff00ff; /* Neon Pink */
+  --border-color: #ffffff;
+  --grid-line: #444444;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+* {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--bg-color);
+  /* Retro CRT scanline effect */
+  background-image: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 6px 100%;
+  color: var(--text-color);
+  font-family: 'Press Start 2P', monospace;
+  text-shadow: 2px 2px 0px #000;
+  /* Prevent scroll */
+  overflow: hidden;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+h1, h2, h3 {
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  letter-spacing: 2px;
+  line-height: 1.5;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
 p {
-  margin: 0;
+  line-height: 1.5;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+/* Button Styling (Retro Arcade) */
+button {
+  font-family: 'Press Start 2P', monospace;
+  background-color: var(--bg-color);
+  color: var(--border-color);
+  border: 4px solid var(--border-color);
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  position: relative;
+  transition: all 0.1s;
+  box-shadow: 6px 6px 0px 0px var(--border-color);
+  margin-top: 1rem;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+button:hover {
+  background-color: var(--text-color);
+  color: #000;
+  border-color: var(--text-color);
+  box-shadow: 6px 6px 0px 0px var(--text-color);
+  text-shadow: none;
+}
+
+button:active {
+  top: 4px;
+  left: 4px;
+  box-shadow: 2px 2px 0px 0px var(--text-color);
+}
+
+.danger-btn {
+  border-color: #ff3333;
+  color: #ff3333;
+  box-shadow: 6px 6px 0px 0px #ff3333;
+}
+
+.danger-btn:hover {
+  background-color: #ff3333;
+  border-color: #ff3333;
+  box-shadow: 6px 6px 0px 0px #ff3333;
+}
+
+/* Base App Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 2rem;
+  background: black;
+  border: 8px solid var(--grid-line);
+  box-shadow: 10px 10px 0px #000;
+  position: relative;
+}
+
+/* Matchmaking screen */
+.matchmaking-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.spinner {
+  margin: 2rem auto;
+  font-size: 2rem;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* Game Lobby & Board */
+.game-lobby {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.player-info {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 2rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.player-info .active-turn {
+  color: yellow;
+  animation: blink 1s step-end infinite;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  background-color: var(--grid-line);
+  border: 6px solid var(--grid-line);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 400px;
+}
+
+.cell {
+  background-color: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 4rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  user-select: none;
+}
+
+.cell:hover {
+  background-color: #222;
+}
+
+.cell.x { color: var(--x-color); text-shadow: 4px 4px #000; }
+.cell.o { color: var(--o-color); text-shadow: 4px 4px #000; }
+
+/* Overlay Modal */
+.overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border: 8px solid var(--border-color);
+  min-height: 100%;
+}
+.overlay h2 {
+  font-size: 2rem;
+  color: var(--text-color);
+  animation: blink 1s step-end infinite;
 }

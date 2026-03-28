@@ -1,121 +1,87 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useEffect, useState } from 'react';
+import { Landing } from './components/Landing';
+import { Matchmaking } from './components/Matchmaking';
+import { GameLobby } from './components/GameLobby';
+import { nakama } from './lib/nakama';
+import { OpCode, type GameState } from './types';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [appState, setAppState] = useState<'landing' | 'matchmaking' | 'game'>('landing');
+  const [username, setUsername] = useState<string>('');
+  const [gameState, setGameState] = useState<GameState | null>(null);
+
+  useEffect(() => {
+    // Authenticate automatically on load
+    nakama.authenticate().then(session => {
+      setUsername(session.username || 'Player');
+      nakama.connectSocket().catch(err => console.error("Socket error", err));
+    }).catch(err => {
+      console.error("Auth error", err);
+    });
+
+    // Wire up listeners
+    nakama.onMatchmakerMatched = async (matched) => {
+      try {
+        await nakama.joinMatch(matched.match_id);
+        setAppState('game');
+      } catch (err) {
+        console.error("Error joining match", err);
+        setAppState('landing');
+      }
+    };
+
+    nakama.onMatchData = (message) => {
+      // OpCodes 2 (UPDATE) and 4 (GAME_OVER) carry the full game state payload
+      if (message.op_code === OpCode.UPDATE || message.op_code === OpCode.GAME_OVER) {
+        try {
+          const payloadStr = new TextDecoder().decode(message.data);
+          const state: GameState = JSON.parse(payloadStr);
+          setGameState(state);
+        } catch (e) {
+          console.error("Failed to parse match data", e);
+        }
+      }
+      if (message.op_code === OpCode.REJECT_MOVE) {
+        console.warn("Move rejected by server");
+      }
+    };
+
+  }, []);
+
+  const handleFindMatch = async () => {
+    setAppState('matchmaking');
+    try {
+      await nakama.findMatch(2, 2);
+    } catch (e) {
+       console.error("Matchmaking error", e);
+       setAppState('landing');
+    }
+  };
+
+  const handleMove = (position: number) => {
+    nakama.sendMove(position);
+  };
+
+  const handleLeave = () => {
+    setGameState(null);
+    nakama.matchId = null;
+    setAppState('landing');
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="app-container">
+      {appState === 'landing' && <Landing username={username} onFindMatch={handleFindMatch} />}
+      {appState === 'matchmaking' && <Matchmaking />}
+      {appState === 'game' && gameState && (
+        <GameLobby 
+          gameState={gameState} 
+          myUserId={nakama.session?.user_id || ''} 
+          onMove={handleMove}
+          onLeave={handleLeave}
+        />
+      )}
+    </div>
+  );
 }
 
-export default App
+export default App;
