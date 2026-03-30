@@ -13,7 +13,12 @@ class NakamaService {
     public matchId: string | null = null;
     
     constructor() {
-        this.client = new Client("defaultkey", "127.0.0.1", "7350", false);
+        const host = import.meta.env.VITE_NAKAMA_HOST || "127.0.0.1";
+        const port = import.meta.env.VITE_NAKAMA_PORT || "7350";
+        const useSSL = import.meta.env.VITE_NAKAMA_SSL === "true";
+        const serverKey = import.meta.env.VITE_NAKAMA_SERVER_KEY || "defaultkey";
+
+        this.client = new Client(serverKey, host, port, useSSL);
     }
 
     async authenticate() {

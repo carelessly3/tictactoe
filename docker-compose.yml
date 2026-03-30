@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  # Database
+  cockroachdb:
+    image: cockroachdb/cockroach:latest-v23.1
+    command: start-single-node --insecure --store=attrs=ram,path=/var/lib/cockroach/
+    restart: "always"
+    environment:
+      - COCKROACH_DATABASE=nakama
+      - COCKROACH_USER=root
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - cockroach_data:/var/lib/cockroach
+
+  # Game Server Build (TS to JS)
+  # This container ensures the backend is built when you run docker-compose
+  backend-builder:
+    image: node:20-alpine
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    command: sh -c "npm install && npm run build"
+
+  # Game Server
+  nakama:
+    image: registry.heroiclabs.com/heroiclabs/nakama:3.22.0
+    restart: "always"
+    depends_on:
+      cockroachdb:
+        condition: service_healthy
+      backend-builder:
+        condition: service_completed_successfully
+    entrypoint:
+      - "/bin/sh"
+      - "-ecx"
+      - >
+        /nakama/nakama migrate up --database.address root@cockroachdb:26257 &&
+        exec /nakama/nakama --name nakama1 --database.address root@cockroachdb:26257 --logger.level DEBUG --session.token_expiry_sec 7200 --metrics.prometheus_port 9100 --runtime.path /nakama/data/build
+    volumes:
+      - ./backend:/nakama/data
+    ports:
+      - "7349:7349"
+      - "7350:7350"
+      - "7351:7351"
+    healthcheck:
+      test: ["CMD", "/nakama/nakama", "healthcheck"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Web Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_NAKAMA_HOST=${PUBLIC_IP_OR_DOMAIN:-127.0.0.1}
+        - VITE_NAKAMA_PORT=${NAKAMA_PORT:-7350}
+        - VITE_NAKAMA_SSL=${NAKAMA_SSL:-false}
+        - VITE_NAKAMA_SERVER_KEY=${NAKAMA_SERVER_KEY:-defaultkey}
+    restart: "always"
+    ports:
+      - "80:80"
+    environment:
+      - VITE_NAKAMA_HOST=${PUBLIC_IP_OR_DOMAIN:-127.0.0.1}
+      - VITE_NAKAMA_PORT=${NAKAMA_PORT:-7350}
+      - VITE_NAKAMA_SSL=${NAKAMA_SSL:-false}
+      - VITE_NAKAMA_SERVER_KEY=${NAKAMA_SERVER_KEY:-defaultkey}
+
+volumes:
+  cockroach_data:
